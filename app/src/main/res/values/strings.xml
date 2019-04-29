@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Dash-Cam</string>
+    <string name="capture_button">This is used to capture photo</string>
+    <string name="record_button">Used to start or stop recording of video</string>
 </resources>
