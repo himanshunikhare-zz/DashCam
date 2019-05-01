@@ -1,6 +1,7 @@
 package com.example.dash_cam;
 
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraDevice;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
@@ -31,6 +32,26 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+//  Creating a camera device
+    private CameraDevice mCameraDevice;
+    private CameraDevice.StateCallback mCameraDeviceStateCallback = new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(CameraDevice camera) {
+            mCameraDevice = camera;
+        }
+
+        @Override
+        public void onDisconnected(CameraDevice camera) {
+            camera.close();
+            mCameraDevice = null;
+        }
+
+        @Override
+        public void onError(CameraDevice camera, int error) {
+            camera.close();
+            mCameraDevice = null;
+        }
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
     }
+
+    @Override
+    protected void onPause() {
+        closeCamera();
+        super.onPause();
+    }
+
 //  To get full screen UI
     @Override
     public void onWindowFocusChanged(boolean hasFocus){
@@ -58,8 +86,13 @@ public class MainActivity extends AppCompatActivity {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
-
+        }
+    }
+//    To free camera resources
+    private void closeCamera(){
+        if(mCameraDevice != null){
+            mCameraDevice.close();
+            mCameraDevice=null;
         }
     }
 }
