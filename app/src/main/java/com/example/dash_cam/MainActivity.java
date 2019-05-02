@@ -1,7 +1,11 @@
 package com.example.dash_cam;
 
+import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
@@ -15,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             Toast.makeText(getApplicationContext(), "TextureView is available", Toast.LENGTH_SHORT).show();
+            setupCamera(width, height);
         }
 
         @Override
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
             mCameraDevice = null;
         }
     };
+    protected String mCameraId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (mTextureView.isAvailable()) {
+            setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         }
@@ -86,6 +93,22 @@ public class MainActivity extends AppCompatActivity {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        }
+    }
+//    Setting up camera
+    private void setupCamera(int width, int height){
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try{
+            for(String cameraId : cameraManager.getCameraIdList()){
+                CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+                if(cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT){
+                    continue;
+                }
+                mCameraId = cameraId;
+                return;
+            }
+        } catch (CameraAccessException e){
+            e.printStackTrace();
         }
     }
 //    To free camera resources
